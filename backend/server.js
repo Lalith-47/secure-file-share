@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import crypto from "crypto"; // Added native crypto module for secure tokens
 import {
   S3Client,
   PutObjectCommand,
@@ -65,7 +66,7 @@ app.get("/api/upload-url", async (req, res) => {
   }
 });
 
-// Route B: Confirm Upload and save Metadata
+// Route B: Confirm Upload and save Metadata with secure token
 app.post("/api/files", async (req, res) => {
   const { uploaderName, fileName, fileFormat, fileSize, s3Key } = req.body;
   if (!uploaderName || !fileName || !fileFormat || !fileSize || !s3Key) {
@@ -73,27 +74,34 @@ app.post("/api/files", async (req, res) => {
   }
 
   try {
+    // Generate a cryptographically secure 16-byte random hex string
+    const sharingToken = crypto.randomBytes(16).toString("hex");
+
     const fileDoc = await File.create({
       uploaderName,
       fileName,
       fileFormat,
       fileSize,
       s3Key,
+      sharingToken, // Persisting secure identifier
     });
 
-    res.status(201).json({ fileId: fileDoc._id });
+    // Return the secure random token to the frontend instead of raw _id
+    res.status(201).json({ fileId: fileDoc.sharingToken });
   } catch (error) {
     console.error("DB Save Error:", error);
     res.status(500).json({ error: "Could not persist metadata." });
   }
 });
 
-// Route C: Request Secure Download URL from S3
+// Route C: Request Secure Download URL using the random token
 app.get("/api/download/:fileId", async (req, res) => {
-  const { fileId } = req.params;
+  const { fileId } = req.params; // This matches the sharingToken
 
   try {
-    const file = await File.findById(fileId);
+    // Query database directly by the cryptographically random token
+    const file = await File.findOne({ sharingToken: fileId });
+
     if (!file) {
       return res
         .status(404)
