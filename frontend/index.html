@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ephemeral File Share — Secure & Cloud Native</title>
+    <style>
+      :root {
+        --bg-color: #090d16;
+        --glass-bg: rgba(30, 41, 59, 0.35);
+        --glass-border: rgba(255, 255, 255, 0.06);
+        --glass-border-focus: rgba(56, 189, 248, 0.4);
+        --accent-blue: #38bdf8;
+        --accent-green: #10b981;
+        --accent-red: #f43f5e;
+        --text-main: #f8fafc;
+        --text-dim: #94a3b8;
+        --radius: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        background-image:
+          radial-gradient(
+            circle at 10% 20%,
+            rgba(56, 189, 248, 0.05) 0%,
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 80% 80%,
+            rgba(16, 185, 129, 0.05) 0%,
+            transparent 40%
+          );
+        background-attachment: fixed;
+        color: var(--text-main);
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 680px;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+      }
+
+      header {
+        text-align: center;
+        animation: fadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      header h1 {
+        font-size: 2.25rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        background: linear-gradient(to right, #38bdf8, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+      }
+
+      header p {
+        color: var(--text-dim);
+        font-size: 0.95rem;
+      }
+
+      /* Glassmorphic Card Style */
+      .card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius);
+        padding: 32px;
+        box-shadow:
+          0 10px 25px -5px rgba(0, 0, 0, 0.3),
+          0 8px 10px -6px rgba(0, 0, 0, 0.3);
+        transition:
+          transform 0.3s ease,
+          border-color 0.3s ease,
+          box-shadow 0.3s ease;
+        animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow:
+          0 20px 35px -5px rgba(0, 0, 0, 0.4),
+          0 12px 15px -6px rgba(0, 0, 0, 0.3);
+      }
+
+      .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .card-title .badge {
+        background: rgba(56, 189, 248, 0.12);
+        color: var(--accent-blue);
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid rgba(56, 189, 248, 0.2);
+      }
+
+      .form-group {
+        margin-bottom: 18px;
+      }
+
+      label {
+        font-size: 0.825rem;
+        color: var(--text-dim);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      input[type="text"],
+      input[type="file"] {
+        width: 100%;
+        padding: 14px;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        color: var(--text-main);
+        font-size: 0.95rem;
+        transition: all 0.25s ease;
+      }
+
+      input[type="text"]:focus {
+        border-color: var(--glass-border-focus);
+        background: rgba(15, 23, 42, 0.7);
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+        outline: none;
+      }
+
+      input[type="file"] {
+        cursor: pointer;
+      }
+
+      input[type="file"]::file-selector-button {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text-main);
+        padding: 6px 14px;
+        border-radius: 6px;
+        margin-right: 14px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: background 0.2s;
+      }
+
+      input[type="file"]::file-selector-button:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        letter-spacing: 0.01em;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .btn-upload {
+        background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+        color: #090d16;
+      }
+
+      .btn-upload:hover {
+        filter: brightness(1.1);
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+        transform: scale(1.01);
+      }
+
+      .btn-download {
+        background: linear-gradient(135deg, var(--accent-green), #059669);
+        color: #090d16;
+      }
+
+      .btn-download:hover {
+        filter: brightness(1.1);
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+        transform: scale(1.01);
+      }
+
+      .status-area {
+        margin-top: 18px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        overflow: hidden;
+        display: none;
+      }
+
+      .status-area.show {
+        display: block;
+        animation: expand 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .status-box {
+        padding: 16px;
+        background: rgba(30, 41, 59, 0.5);
+        border-left: 4px solid var(--accent-blue);
+        border-radius: 0 10px 10px 0;
+        word-break: break-all;
+      }
+
+      .status-box.success {
+        background: rgba(16, 185, 129, 0.08);
+        border-color: var(--accent-green);
+      }
+
+      .status-box.error {
+        background: rgba(244, 63, 94, 0.08);
+        border-color: var(--accent-red);
+      }
+
+      code {
+        background: rgba(0, 0, 0, 0.35);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 0.85rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: #e2e8f0;
+        user-select: all;
+      }
+
+      /* Keyframes */
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes expand {
+        from {
+          opacity: 0;
+          max-height: 0;
+        }
+        to {
+          opacity: 1;
+          max-height: 250px;
+        }
+      }
+
+      /* Responsive Queries */
+      @media (max-width: 640px) {
+        body {
+          padding: 16px 12px;
+        }
+        .card {
+          padding: 22px;
+        }
+        header h1 {
+          font-size: 1.85rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Direct Secure File Share</h1>
+        <p>Decentralized browser uploads directly to S3 cloud storage.</p>
+      </header>
+
+      <div class="card">
+        <div class="card-title">
+          1. Cloud Upload
+          <span class="badge">48hr Expiration</span>
+        </div>
+
+        <div class="form-group">
+          <label for="uploaderName">Your Name</label>
+          <input
+            type="text"
+            id="uploaderName"
+            placeholder="E.g. Lalith"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="filePicker">Select File</label>
+          <input type="file" id="filePicker" required />
+        </div>
+
+        <button class="btn-upload" onclick="handleUpload()">
+          Get Direct Link & Upload
+        </button>
+        <div id="uploadStatus" class="status-area"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">2. Retrieve Shared File</div>
+
+        <div class="form-group">
+          <label for="fileIdInput">Enter Metadata ID</label>
+          <input
+            type="text"
+            id="fileIdInput"
+            placeholder="Paste MongoDB file ID here..."
+          />
+        </div>
+
+        <button class="btn-download" onclick="handleDownload()">
+          Verify & Download
+        </button>
+        <div id="downloadStatus" class="status-area"></div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:5000/api";
+
+      function updateStatus(elementId, content, type = "normal") {
+        const el = document.getElementById(elementId);
+        el.classList.add("show");
+        el.innerHTML = `
+        <div class="status-box ${type === "success" ? "success" : type === "error" ? "error" : ""}">
+          ${content}
+        </div>`;
+      }
+
+      async function handleUpload() {
+        const uploaderName = document
+          .getElementById("uploaderName")
+          .value.trim();
+        const fileInput = document.getElementById("filePicker");
+        const uploadStatus = document.getElementById("uploadStatus");
+
+        if (!uploaderName || !fileInput.files[0]) {
+          return alert("Please enter your name and choose a file to share.");
+        }
+
+        const file = fileInput.files[0];
+        updateStatus(
+          "uploadStatus",
+          "Step 1/3: Creating upload link handshake...",
+        );
+
+        try {
+          // A. Handshake to retrieve Signed URL
+          const urlResponse = await fetch(
+            `${API_BASE}/upload-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type || "application/octet-stream")}`,
+          );
+          if (!urlResponse.ok) throw new Error("Failed to sign URL handshake");
+
+          const { uploadUrl, s3Key } = await urlResponse.json();
+
+          // B. Pure Cloud Upload
+          updateStatus(
+            "uploadStatus",
+            "Step 2/3: Direct streaming to S3 Cloud Storage...",
+          );
+          const uploadResult = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: {
+              "Content-Type": file.type || "application/octet-stream",
+            },
+            body: file,
+          });
+
+          if (!uploadResult.ok)
+            throw new Error("AWS bucket rejected direct upload");
+
+          // C. DB Metadata Registration
+          updateStatus(
+            "uploadStatus",
+            "Step 3/3: Verifying cloud metadata in database...",
+          );
+          const dbResponse = await fetch(`${API_BASE}/files`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              uploaderName,
+              fileName: file.name,
+              fileFormat: file.type || "unknown",
+              fileSize: file.size,
+              s3Key,
+            }),
+          });
+
+          if (!dbResponse.ok) throw new Error("Failed to write to database.");
+
+          const data = await dbResponse.json();
+          updateStatus(
+            "uploadStatus",
+            `
+          <strong>Upload Complete!</strong><br><br>
+          Send this unique ID to your friend:<br>
+          <code>${data.fileId}</code>
+        `,
+            "success",
+          );
+        } catch (err) {
+          updateStatus(
+            "uploadStatus",
+            `<strong>Process Error:</strong> ${err.message}`,
+            "error",
+          );
+        }
+      }
+
+      async function handleDownload() {
+        const id = document.getElementById("fileIdInput").value.trim();
+        const downloadStatus = document.getElementById("downloadStatus");
+
+        if (!id) return alert("Please enter a valid file metadata ID.");
+
+        try {
+          updateStatus("downloadStatus", "Checking metadata cluster status...");
+          const res = await fetch(`${API_BASE}/download/${id}`);
+          const data = await res.json();
+
+          if (!res.ok) throw new Error(data.error);
+
+          updateStatus(
+            "downloadStatus",
+            `
+          <strong>File Verified Successfully!</strong><br><br>
+          <strong>Name:</strong> ${data.fileName}<br>
+          <strong>Uploader:</strong> ${data.uploaderName}<br>
+          <strong>Size:</strong> ${(data.fileSize / 1024 / 1024).toFixed(2)} MB<br><br>
+          <a href="${data.downloadUrl}" target="_blank" style="background:var(--accent-green); color:#090d16; padding:12px 18px; text-decoration:none; display:inline-block; border-radius:8px; font-weight:bold; font-size: 0.9rem;">Download File from AWS</a>
+        `,
+            "success",
+          );
+        } catch (err) {
+          updateStatus(
+            "downloadStatus",
+            `<strong>Process Error:</strong> ${err.message}`,
+            "error",
+          );
+        }
+      }
+    </script>
+  </body>
+</html>
