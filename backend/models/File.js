@@ -25,6 +25,12 @@ const fileSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  sharingToken: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true, // Highly efficient for fast lookups
+  },
   createdAt: {
     type: Date,
     default: Date.now,
