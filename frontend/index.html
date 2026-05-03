@@ -1,489 +1,1552 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ephemeral File Share — Secure & Cloud Native</title>
+    <title>Ephemeral — Secure File Transfer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Epilogue:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
       :root {
-        --bg-color: #090d16;
-        --glass-bg: rgba(30, 41, 59, 0.35);
-        --glass-border: rgba(255, 255, 255, 0.06);
-        --glass-border-focus: rgba(56, 189, 248, 0.4);
-        --accent-blue: #38bdf8;
-        --accent-green: #10b981;
-        --accent-red: #f43f5e;
-        --text-main: #f8fafc;
-        --text-dim: #94a3b8;
-        --radius: 16px;
+        --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
       }
 
-      * {
+      /* ═══════════════════════════════════════
+       DARK THEME
+    ═══════════════════════════════════════ */
+      [data-theme="dark"] {
+        --bg: #07090f;
+        --orb-a: rgba(14, 165, 233, 0.13);
+        --orb-b: rgba(99, 102, 241, 0.09);
+        --orb-c: rgba(20, 184, 166, 0.07);
+
+        --glass: rgba(255, 255, 255, 0.042);
+        --glass-hov: rgba(255, 255, 255, 0.068);
+        --glass-border: rgba(255, 255, 255, 0.09);
+        --glass-shine: rgba(255, 255, 255, 0.13);
+        --glass-shadow:
+          0 24px 64px -12px rgba(0, 0, 0, 0.5),
+          0 4px 20px -4px rgba(0, 0, 0, 0.4);
+        --glass-shadow-hov:
+          0 36px 80px -12px rgba(0, 0, 0, 0.6),
+          0 8px 28px -6px rgba(0, 0, 0, 0.5);
+
+        --input-bg: rgba(0, 0, 0, 0.25);
+        --input-border: rgba(255, 255, 255, 0.08);
+        --input-focus-ring: rgba(14, 165, 233, 0.09);
+        --input-focus-bd: rgba(14, 165, 233, 0.5);
+
+        --accent: #0ea5e9;
+        --accent-dim: rgba(14, 165, 233, 0.13);
+        --accent-glow: rgba(14, 165, 233, 0.32);
+        --green: #10b981;
+        --green-dim: rgba(16, 185, 129, 0.12);
+        --green-glow: rgba(16, 185, 129, 0.28);
+        --amber: #f59e0b;
+        --amber-dim: rgba(245, 158, 11, 0.12);
+        --red: #f43f5e;
+
+        --text: #eef2f8;
+        --text-sub: rgba(238, 242, 248, 0.58);
+        --text-muted: rgba(238, 242, 248, 0.32);
+
+        --toggle-bg: rgba(255, 255, 255, 0.07);
+        --toggle-bd: rgba(255, 255, 255, 0.12);
+        --conn-line: rgba(255, 255, 255, 0.07);
+        --pill-bg: rgba(255, 255, 255, 0.04);
+        --pill-bd: rgba(255, 255, 255, 0.08);
+        --noise-op: 0.028;
+        --grid-color: rgba(14, 165, 233, 0.028);
+        --orb-blur: 88px;
+      }
+
+      /* ═══════════════════════════════════════
+       LIGHT THEME
+    ═══════════════════════════════════════ */
+      [data-theme="light"] {
+        --bg: #edf2f9;
+        --orb-a: rgba(14, 165, 233, 0.22);
+        --orb-b: rgba(99, 102, 241, 0.14);
+        --orb-c: rgba(20, 184, 166, 0.12);
+
+        --glass: rgba(255, 255, 255, 0.6);
+        --glass-hov: rgba(255, 255, 255, 0.8);
+        --glass-border: rgba(255, 255, 255, 0.85);
+        --glass-shine: rgba(255, 255, 255, 1);
+        --glass-shadow:
+          0 20px 60px -10px rgba(90, 120, 200, 0.14),
+          0 4px 16px -4px rgba(90, 120, 200, 0.1);
+        --glass-shadow-hov:
+          0 32px 76px -10px rgba(90, 120, 200, 0.22),
+          0 8px 24px -6px rgba(90, 120, 200, 0.16);
+
+        --input-bg: rgba(255, 255, 255, 0.7);
+        --input-border: rgba(190, 210, 240, 0.9);
+        --input-focus-ring: rgba(14, 165, 233, 0.08);
+        --input-focus-bd: rgba(14, 165, 233, 0.55);
+
+        --accent: #0284c7;
+        --accent-dim: rgba(2, 132, 199, 0.1);
+        --accent-glow: rgba(2, 132, 199, 0.24);
+        --green: #059669;
+        --green-dim: rgba(5, 150, 105, 0.09);
+        --green-glow: rgba(5, 150, 105, 0.22);
+        --amber: #d97706;
+        --amber-dim: rgba(217, 119, 6, 0.1);
+        --red: #e11d48;
+
+        --text: #0c172b;
+        --text-sub: rgba(12, 23, 43, 0.6);
+        --text-muted: rgba(12, 23, 43, 0.36);
+
+        --toggle-bg: rgba(0, 0, 0, 0.05);
+        --toggle-bd: rgba(0, 0, 0, 0.1);
+        --conn-line: rgba(0, 0, 0, 0.09);
+        --pill-bg: rgba(0, 0, 0, 0.04);
+        --pill-bd: rgba(0, 0, 0, 0.08);
+        --noise-op: 0.015;
+        --grid-color: rgba(0, 80, 180, 0.03);
+        --orb-blur: 76px;
+      }
+
+      /* ═══════════════════════════════════════
+       BASE RESET
+    ═══════════════════════════════════════ */
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
       }
+      html {
+        scroll-behavior: smooth;
+      }
 
       body {
-        background-color: var(--bg-color);
-        background-image:
-          radial-gradient(
-            circle at 10% 20%,
-            rgba(56, 189, 248, 0.05) 0%,
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 80% 80%,
-            rgba(16, 185, 129, 0.05) 0%,
-            transparent 40%
-          );
-        background-attachment: fixed;
-        color: var(--text-main);
-        font-family:
-          system-ui,
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          sans-serif;
+        background: var(--bg);
+        font-family: "Epilogue", sans-serif;
+        color: var(--text);
         min-height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 24px 16px;
+        padding: 108px 16px 76px;
+        overflow-x: hidden;
+        position: relative;
+        transition:
+          background 0.6s ease,
+          color 0.4s ease;
       }
 
-      .container {
+      /* ═══════════════════════════════════════
+       BACKGROUND
+    ═══════════════════════════════════════ */
+      .bg-layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      /* Animated orbs */
+      .orbs {
+        z-index: 0;
+        overflow: hidden;
+      }
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        transition: background 0.7s ease;
+      }
+      .orb-a {
+        width: min(60vw, 640px);
+        height: min(60vw, 640px);
+        top: -15%;
+        left: -10%;
+        background: var(--orb-a);
+        filter: blur(var(--orb-blur));
+        animation: drift-a 20s ease-in-out infinite alternate;
+      }
+      .orb-b {
+        width: min(48vw, 560px);
+        height: min(48vw, 560px);
+        bottom: -12%;
+        right: -8%;
+        background: var(--orb-b);
+        filter: blur(var(--orb-blur));
+        animation: drift-b 24s ease-in-out infinite alternate;
+      }
+      .orb-c {
+        width: min(38vw, 440px);
+        height: min(38vw, 440px);
+        top: 38%;
+        left: 48%;
+        background: var(--orb-c);
+        filter: blur(calc(var(--orb-blur) * 0.85));
+        animation: drift-c 18s ease-in-out infinite alternate;
+      }
+      @keyframes drift-a {
+        to {
+          transform: translate(5%, 7%) scale(1.07);
+        }
+      }
+      @keyframes drift-b {
+        to {
+          transform: translate(-6%, -5%) scale(1.05);
+        }
+      }
+      @keyframes drift-c {
+        to {
+          transform: translate(-48%, -52%) scale(1.1);
+        }
+      }
+
+      /* Grid */
+      .bg-grid {
+        z-index: 0;
+        background-image:
+          linear-gradient(var(--grid-color) 1px, transparent 1px),
+          linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+        background-size: 54px 54px;
+        transition: background-image 0.6s;
+      }
+
+      /* Noise */
+      .bg-noise {
+        z-index: 0;
+        opacity: var(--noise-op);
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 200px;
+        transition: opacity 0.6s;
+      }
+
+      /* Particles */
+      .particles {
+        z-index: 0;
+      }
+      .pdot {
+        position: absolute;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: pdot-rise linear infinite;
+      }
+      @keyframes pdot-rise {
+        0% {
+          transform: translateY(108vh) scale(0);
+          opacity: 0;
+        }
+        7% {
+          opacity: 1;
+        }
+        93% {
+          opacity: 0.4;
+        }
+        100% {
+          transform: translateY(-8vh) scale(1.3);
+          opacity: 0;
+        }
+      }
+
+      /* ═══════════════════════════════════════
+       THEME TOGGLE
+    ═══════════════════════════════════════ */
+      .toggle-wrap {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 200;
+      }
+
+      .t-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
+        border: 1px solid var(--toggle-bd);
+        background: var(--toggle-bg);
+        backdrop-filter: blur(20px) saturate(160%);
+        -webkit-backdrop-filter: blur(20px) saturate(160%);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        transition:
+          background 0.35s,
+          border-color 0.35s,
+          transform 0.3s var(--ease-out-expo),
+          box-shadow 0.3s;
+        color: var(--text);
+      }
+
+      .t-btn:hover {
+        transform: scale(1.07) rotate(5deg);
+        box-shadow: var(--glass-shadow);
+      }
+      .t-btn:active {
+        transform: scale(0.93);
+      }
+
+      .t-icon {
+        position: absolute;
+        transition:
+          transform 0.5s var(--ease-out-expo),
+          opacity 0.35s ease;
+        color: var(--text);
+      }
+
+      .t-moon {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+      .t-sun {
+        opacity: 0;
+        transform: scale(0.5) rotate(-90deg);
+      }
+
+      [data-theme="light"] .t-moon {
+        opacity: 0;
+        transform: scale(0.5) rotate(90deg);
+      }
+      [data-theme="light"] .t-sun {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+      }
+
+      /* ═══════════════════════════════════════
+       CONTENT WRAPPER
+    ═══════════════════════════════════════ */
+      .wrap {
+        position: relative;
+        z-index: 1;
         width: 100%;
-        max-width: 680px;
+        max-width: 596px;
         display: flex;
         flex-direction: column;
-        gap: 28px;
       }
 
-      header {
+      /* ═══════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════ */
+      .site-header {
         text-align: center;
-        animation: fadeInDown 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 52px;
       }
 
-      header h1 {
-        font-size: 2.25rem;
-        font-weight: 800;
-        letter-spacing: -0.025em;
-        background: linear-gradient(to right, #38bdf8, #818cf8);
+      .site-header > * {
+        opacity: 0;
+        animation: slide-down 0.9s var(--ease-out-expo) both;
+      }
+
+      @keyframes slide-down {
+        from {
+          opacity: 0;
+          transform: translateY(-18px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 15px 6px 10px;
+        border-radius: 100px;
+        border: 1px solid var(--glass-border);
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        font-family: "Fira Code", monospace;
+        font-size: 0.67rem;
+        font-weight: 400;
+        color: var(--text-muted);
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+        animation-delay: 0s;
+        transition:
+          background 0.5s,
+          border-color 0.5s,
+          color 0.4s;
+      }
+
+      .live-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 0 0 var(--green);
+        animation: live-pulse 2.5s ease-in-out infinite;
+      }
+      @keyframes live-pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55);
+        }
+        50% {
+          box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
+        }
+      }
+
+      .site-header h1 {
+        font-size: clamp(2.3rem, 6.5vw, 3.8rem);
+        font-weight: 900;
+        letter-spacing: -0.046em;
+        line-height: 1.04;
+        color: var(--text);
+        margin-bottom: 14px;
+        animation-delay: 0.1s;
+        transition: color 0.4s;
+      }
+
+      .site-header h1 em {
+        font-style: normal;
+        background: linear-gradient(
+          120deg,
+          var(--accent) 0%,
+          #818cf8 50%,
+          var(--green) 100%
+        );
+        background-size: 220% 220%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 8px;
+        background-clip: text;
+        animation: grad-shift 7s ease infinite;
+      }
+      @keyframes grad-shift {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
       }
 
-      header p {
-        color: var(--text-dim);
-        font-size: 0.95rem;
+      .site-header p {
+        font-family: "Fira Code", monospace;
+        font-size: 0.78rem;
+        font-weight: 300;
+        color: var(--text-muted);
+        letter-spacing: 0.03em;
+        animation-delay: 0.2s;
+        transition: color 0.4s;
       }
 
-      /* Glassmorphic Card Style */
+      /* ═══════════════════════════════════════
+       GLASS CARD
+    ═══════════════════════════════════════ */
       .card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        background: var(--glass);
+        backdrop-filter: blur(32px) saturate(210%) brightness(1.01);
+        -webkit-backdrop-filter: blur(32px) saturate(210%) brightness(1.01);
         border: 1px solid var(--glass-border);
-        border-radius: var(--radius);
-        padding: 32px;
-        box-shadow:
-          0 10px 25px -5px rgba(0, 0, 0, 0.3),
-          0 8px 10px -6px rgba(0, 0, 0, 0.3);
+        border-radius: 24px;
+        padding: 38px 38px 34px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--glass-shadow);
+
+        opacity: 0;
+        animation: card-rise 0.9s var(--ease-out-expo) both;
         transition:
-          transform 0.3s ease,
-          border-color 0.3s ease,
-          box-shadow 0.3s ease;
-        animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+          background 0.5s,
+          border-color 0.5s,
+          box-shadow 0.45s,
+          transform 0.45s var(--ease-out-expo);
       }
 
+      .card-upload {
+        animation-delay: 0.28s;
+      }
+      .card-download {
+        animation-delay: 0.42s;
+      }
+
+      @keyframes card-rise {
+        from {
+          opacity: 0;
+          transform: translateY(34px) scale(0.975);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      /* Hover lift */
       .card:hover {
-        transform: translateY(-4px);
-        border-color: rgba(255, 255, 255, 0.12);
-        box-shadow:
-          0 20px 35px -5px rgba(0, 0, 0, 0.4),
-          0 12px 15px -6px rgba(0, 0, 0, 0.3);
+        background: var(--glass-hov);
+        box-shadow: var(--glass-shadow-hov);
+        transform: translateY(-6px);
+      }
+
+      /* Top inner shine */
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 24px;
+        background: linear-gradient(
+          160deg,
+          var(--glass-shine) 0%,
+          transparent 32%
+        );
+        opacity: 0.55;
+        pointer-events: none;
+        transition: opacity 0.5s;
+      }
+
+      /* Accent orb inside card */
+      .card-upload .card-glow {
+        position: absolute;
+        pointer-events: none;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        top: -80px;
+        right: -60px;
+        background: var(--accent-dim);
+        filter: blur(55px);
+        transition: background 0.5s;
+      }
+      .card-download .card-glow {
+        position: absolute;
+        pointer-events: none;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        bottom: -80px;
+        left: -60px;
+        background: var(--green-dim);
+        filter: blur(55px);
+        transition: background 0.5s;
+      }
+
+      /* ═══════════════════════════════════════
+       CARD HEADER
+    ═══════════════════════════════════════ */
+      .card-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 32px;
+      }
+
+      .step-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-family: "Fira Code", monospace;
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 7px;
+        transition: color 0.4s;
+      }
+      .step-tag.green {
+        color: var(--green);
+      }
+
+      .step-tag::before {
+        content: "";
+        display: block;
+        width: 18px;
+        height: 1px;
+        background: currentColor;
+        border-radius: 1px;
+        opacity: 0.7;
       }
 
       .card-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-main);
-        display: flex;
+        font-size: 1.42rem;
+        font-weight: 800;
+        letter-spacing: -0.032em;
+        line-height: 1.15;
+        color: var(--text);
+        transition: color 0.4s;
+      }
+
+      .badge {
+        display: inline-flex;
         align-items: center;
-        gap: 10px;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 100px;
+        background: var(--amber-dim);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        font-family: "Fira Code", monospace;
+        font-size: 0.63rem;
+        font-weight: 500;
+        letter-spacing: 0.07em;
+        color: var(--amber);
+        white-space: nowrap;
+        flex-shrink: 0;
+        margin-top: 4px;
+        transition:
+          background 0.4s,
+          border-color 0.4s,
+          color 0.4s;
+      }
+
+      /* ═══════════════════════════════════════
+       FORM ELEMENTS
+    ═══════════════════════════════════════ */
+      .field {
         margin-bottom: 20px;
       }
 
-      .card-title .badge {
-        background: rgba(56, 189, 248, 0.12);
-        color: var(--accent-blue);
-        font-size: 0.75rem;
-        padding: 4px 10px;
-        border-radius: 20px;
-        border: 1px solid rgba(56, 189, 248, 0.2);
-      }
-
-      .form-group {
-        margin-bottom: 18px;
-      }
-
-      label {
-        font-size: 0.825rem;
-        color: var(--text-dim);
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+      .flabel {
         display: block;
-        margin-bottom: 8px;
+        font-family: "Fira Code", monospace;
+        font-size: 0.66rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 9px;
+        transition: color 0.4s;
       }
 
-      input[type="text"],
-      input[type="file"] {
+      .finput {
         width: 100%;
-        padding: 14px;
-        background: rgba(15, 23, 42, 0.5);
-        border: 1px solid var(--glass-border);
-        border-radius: 10px;
-        color: var(--text-main);
-        font-size: 0.95rem;
-        transition: all 0.25s ease;
-      }
-
-      input[type="text"]:focus {
-        border-color: var(--glass-border-focus);
-        background: rgba(15, 23, 42, 0.7);
-        box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+        padding: 13px 16px;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 12px;
+        color: var(--text);
+        font-family: "Epilogue", sans-serif;
+        font-size: 0.91rem;
+        font-weight: 400;
         outline: none;
+        transition:
+          background 0.3s,
+          border-color 0.3s,
+          box-shadow 0.3s,
+          color 0.4s;
+      }
+      .finput::placeholder {
+        color: var(--text-muted);
+      }
+      .finput:focus {
+        background: var(--input-bg);
+        border-color: var(--input-focus-bd);
+        box-shadow: 0 0 0 4px var(--input-focus-ring);
       }
 
-      input[type="file"] {
-        cursor: pointer;
-      }
-
-      input[type="file"]::file-selector-button {
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        color: var(--text-main);
-        padding: 6px 14px;
-        border-radius: 6px;
-        margin-right: 14px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        transition: background 0.2s;
-      }
-
-      input[type="file"]::file-selector-button:hover {
-        background: rgba(255, 255, 255, 0.15);
-      }
-
-      button {
-        width: 100%;
-        padding: 14px;
-        border-radius: 10px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        letter-spacing: 0.01em;
-        border: none;
+      /* Drop Zone */
+      .drop-zone {
+        position: relative;
+        border: 1.5px dashed var(--input-border);
+        border-radius: 14px;
+        padding: 26px 20px;
+        background: var(--input-bg);
         cursor: pointer;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        gap: 8px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        gap: 10px;
+        text-align: center;
+        transition:
+          border-color 0.3s,
+          background 0.3s;
+      }
+      .drop-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+      }
+      .drop-zone:hover {
+        border-color: var(--accent);
+        background: var(--accent-dim);
+      }
+      .drop-zone.filled {
+        border-style: solid;
+        border-color: var(--green);
+        background: var(--green-dim);
       }
 
-      .btn-upload {
-        background: linear-gradient(135deg, var(--accent-blue), #2563eb);
-        color: #090d16;
+      .dz-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 13px;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        transition: all 0.3s;
+      }
+      .drop-zone:hover .dz-icon {
+        color: var(--accent);
+        border-color: var(--accent-dim);
+      }
+      .drop-zone.filled .dz-icon {
+        color: var(--green);
+        border-color: var(--green-dim);
       }
 
-      .btn-upload:hover {
-        filter: brightness(1.1);
-        box-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
-        transform: scale(1.01);
+      .dz-hint {
+        font-size: 0.83rem;
+        color: var(--text-sub);
+        line-height: 1.5;
+        transition: color 0.4s;
+      }
+      .dz-hint strong {
+        font-weight: 700;
+        color: var(--text);
       }
 
-      .btn-download {
-        background: linear-gradient(135deg, var(--accent-green), #059669);
-        color: #090d16;
+      .dz-name {
+        display: none;
+        font-family: "Fira Code", monospace;
+        font-size: 0.76rem;
+        font-weight: 500;
+        color: var(--green);
+        word-break: break-all;
       }
-
-      .btn-download:hover {
-        filter: brightness(1.1);
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
-        transform: scale(1.01);
+      .drop-zone.filled .dz-name {
+        display: block;
       }
-
-      .status-area {
-        margin-top: 18px;
-        border-radius: 10px;
-        font-size: 0.9rem;
-        overflow: hidden;
+      .drop-zone.filled .dz-hint {
         display: none;
       }
 
-      .status-area.show {
-        display: block;
-        animation: expand 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      /* ═══════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════ */
+      .btn {
+        position: relative;
+        width: 100%;
+        padding: 14px 22px;
+        border: none;
+        border-radius: 13px;
+        font-family: "Epilogue", sans-serif;
+        font-size: 0.91rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        overflow: hidden;
+        transition:
+          transform 0.35s var(--ease-out-expo),
+          filter 0.3s,
+          box-shadow 0.35s;
+      }
+
+      /* Shimmer sweep on hover */
+      .btn::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -120%;
+        width: 65%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transform: skewX(-18deg);
+        transition: left 0.6s ease;
+      }
+      .btn:hover::after {
+        left: 140%;
+      }
+      .btn:hover {
+        transform: translateY(-3px);
+        filter: brightness(1.07);
+      }
+      .btn:active {
+        transform: translateY(0) scale(0.975);
+        filter: brightness(0.96);
+      }
+      .btn:disabled {
+        opacity: 0.48;
+        cursor: not-allowed;
+        transform: none !important;
+        filter: none !important;
+      }
+
+      .btn-blue {
+        background: linear-gradient(135deg, #0ea5e9, #2563eb);
+        color: #fff;
+        box-shadow:
+          0 4px 20px var(--accent-glow),
+          0 1px 0 rgba(255, 255, 255, 0.18) inset;
+      }
+      .btn-blue:hover {
+        box-shadow:
+          0 8px 32px var(--accent-glow),
+          0 1px 0 rgba(255, 255, 255, 0.18) inset;
+      }
+
+      .btn-green {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff;
+        box-shadow:
+          0 4px 20px var(--green-glow),
+          0 1px 0 rgba(255, 255, 255, 0.14) inset;
+      }
+      .btn-green:hover {
+        box-shadow:
+          0 8px 32px var(--green-glow),
+          0 1px 0 rgba(255, 255, 255, 0.14) inset;
+      }
+
+      .btn svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+      }
+
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.28);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.65s linear infinite;
+        display: none;
+        flex-shrink: 0;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ═══════════════════════════════════════
+       STATUS
+    ═══════════════════════════════════════ */
+      .status-wrap {
+        margin-top: 18px;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition:
+          max-height 0.55s var(--ease-out-expo),
+          opacity 0.4s ease;
+      }
+      .status-wrap.open {
+        max-height: 380px;
+        opacity: 1;
       }
 
       .status-box {
-        padding: 16px;
-        background: rgba(30, 41, 59, 0.5);
-        border-left: 4px solid var(--accent-blue);
-        border-radius: 0 10px 10px 0;
+        padding: 16px 18px;
+        border-radius: 13px;
+        border: 1px solid var(--glass-border);
+        background: var(--glass);
+        backdrop-filter: blur(14px);
+        font-size: 0.84rem;
+        line-height: 1.78;
+        color: var(--text-sub);
+        transition:
+          background 0.4s,
+          border-color 0.4s,
+          color 0.4s;
+      }
+      .status-box.s-info {
+        border-color: rgba(14, 165, 233, 0.24);
+      }
+      .status-box.s-ok {
+        border-color: rgba(16, 185, 129, 0.28);
+        background: var(--green-dim);
+      }
+      .status-box.s-err {
+        border-color: rgba(244, 63, 94, 0.24);
+        background: rgba(244, 63, 94, 0.06);
+      }
+
+      .s-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: "Fira Code", monospace;
+        font-size: 0.65rem;
+        font-weight: 500;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+        margin-bottom: 9px;
+      }
+      .s-tag::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .s-tag.info {
+        color: var(--accent);
+      }
+      .s-tag.ok {
+        color: var(--green);
+      }
+      .s-tag.err {
+        color: var(--red);
+      }
+
+      .id-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 11px;
+        padding: 10px 14px;
+        border-radius: 9px;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        transition:
+          background 0.4s,
+          border-color 0.4s;
+      }
+      .id-val {
+        font-family: "Fira Code", monospace;
+        font-size: 0.77rem;
+        font-weight: 500;
+        color: var(--accent);
         word-break: break-all;
+        flex: 1;
+      }
+      .copy-btn {
+        padding: 5px 11px;
+        border-radius: 7px;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        color: var(--text-muted);
+        font-family: "Fira Code", monospace;
+        font-size: 0.61rem;
+        letter-spacing: 0.07em;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition:
+          border-color 0.25s,
+          color 0.25s,
+          background 0.25s;
+      }
+      .copy-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-dim);
       }
 
-      .status-box.success {
-        background: rgba(16, 185, 129, 0.08);
-        border-color: var(--accent-green);
+      .dl-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 13px;
+        padding: 11px 19px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, var(--green), #059669);
+        color: #fff;
+        font-family: "Epilogue", sans-serif;
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 4px 18px var(--green-glow);
+        transition:
+          transform 0.3s,
+          filter 0.3s,
+          box-shadow 0.3s;
+      }
+      .dl-link:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.06);
+        box-shadow: 0 8px 24px var(--green-glow);
       }
 
-      .status-box.error {
-        background: rgba(244, 63, 94, 0.08);
-        border-color: var(--accent-red);
+      /* ═══════════════════════════════════════
+       CONNECTOR
+    ═══════════════════════════════════════ */
+      .connector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 44px;
+        position: relative;
+      }
+      .connector::before {
+        content: "";
+        position: absolute;
+        width: 1px;
+        height: 100%;
+        background: linear-gradient(
+          to bottom,
+          transparent,
+          var(--conn-line),
+          transparent
+        );
+        transition: background 0.5s;
+      }
+      .conn-node {
+        position: relative;
+        z-index: 1;
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        transition:
+          background 0.5s,
+          border-color 0.5s,
+          color 0.4s;
       }
 
-      code {
-        background: rgba(0, 0, 0, 0.35);
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-family:
-          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-        font-size: 0.85rem;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        color: #e2e8f0;
-        user-select: all;
+      /* ═══════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════ */
+      .site-footer {
+        position: relative;
+        z-index: 1;
+        margin-top: 48px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        opacity: 0;
+        animation: card-rise 0.9s var(--ease-out-expo) 0.6s both;
+      }
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+      }
+      .pill {
+        padding: 5px 12px;
+        border-radius: 100px;
+        background: var(--pill-bg);
+        border: 1px solid var(--pill-bd);
+        font-family: "Fira Code", monospace;
+        font-size: 0.61rem;
+        letter-spacing: 0.07em;
+        color: var(--text-muted);
+        transition:
+          background 0.5s,
+          border-color 0.5s,
+          color 0.4s;
+      }
+      .foot-note {
+        font-family: "Fira Code", monospace;
+        font-size: 0.66rem;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        transition: color 0.4s;
       }
 
-      /* Keyframes */
-      @keyframes fadeInDown {
-        from {
-          opacity: 0;
-          transform: translateY(-16px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes expand {
-        from {
-          opacity: 0;
-          max-height: 0;
-        }
-        to {
-          opacity: 1;
-          max-height: 250px;
-        }
-      }
-
-      /* Responsive Queries */
-      @media (max-width: 640px) {
+      /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+      @media (max-width: 620px) {
         body {
-          padding: 16px 12px;
+          padding: 96px 14px 64px;
         }
         .card {
-          padding: 22px;
+          padding: 28px 22px 26px;
         }
-        header h1 {
-          font-size: 1.85rem;
+        .card-head {
+          flex-direction: column;
+          gap: 10px;
+        }
+        .site-header {
+          margin-bottom: 38px;
+        }
+      }
+      @media (max-width: 400px) {
+        .card {
+          padding: 22px 16px 20px;
+        }
+        .site-header h1 {
+          font-size: 2.05rem;
+        }
+        .id-row {
+          flex-direction: column;
+          align-items: flex-start;
         }
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <header>
-        <h1>Direct Secure File Share</h1>
-        <p>Decentralized browser uploads directly to S3 cloud storage.</p>
-      </header>
+    <!-- ─── BACKGROUND ─── -->
+    <div class="bg-layer orbs">
+      <div class="orb orb-a"></div>
+      <div class="orb orb-b"></div>
+      <div class="orb orb-c"></div>
+    </div>
+    <div class="bg-layer bg-grid"></div>
+    <div class="bg-layer bg-noise"></div>
+    <div class="bg-layer particles" id="particles"></div>
 
-      <div class="card">
-        <div class="card-title">
-          1. Cloud Upload
-          <span class="badge">48hr Expiration</span>
-        </div>
-
-        <div class="form-group">
-          <label for="uploaderName">Your Name</label>
-          <input
-            type="text"
-            id="uploaderName"
-            placeholder="E.g. Lalith"
-            required
+    <!-- ─── TOGGLE ─── -->
+    <div class="toggle-wrap">
+      <button class="t-btn" id="themeToggle" aria-label="Toggle theme">
+        <svg
+          class="t-icon t-moon"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        <svg
+          class="t-icon t-sun"
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="4" />
+          <path
+            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
           />
-        </div>
-
-        <div class="form-group">
-          <label for="filePicker">Select File</label>
-          <input type="file" id="filePicker" required />
-        </div>
-
-        <button class="btn-upload" onclick="handleUpload()">
-          Get Direct Link & Upload
-        </button>
-        <div id="uploadStatus" class="status-area"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">2. Retrieve Shared File</div>
-
-        <div class="form-group">
-          <label for="fileIdInput">Enter Metadata ID</label>
-          <input
-            type="text"
-            id="fileIdInput"
-            placeholder="Paste MongoDB file ID here..."
-          />
-        </div>
-
-        <button class="btn-download" onclick="handleDownload()">
-          Verify & Download
-        </button>
-        <div id="downloadStatus" class="status-area"></div>
-      </div>
+        </svg>
+      </button>
     </div>
 
-    <script>
-      const API_BASE = "http://localhost:5000/api";
+    <!-- ─── MAIN ─── -->
+    <div class="wrap">
+      <!-- Header -->
+      <header class="site-header">
+        <div class="eyebrow">
+          <span class="live-dot"></span>
+          Ephemeral Transfer — v2.0
+        </div>
+        <h1>Share Files <em>Securely.</em></h1>
+        <p>
+          // direct S3 upload &nbsp;·&nbsp; no server storage &nbsp;·&nbsp; 48hr
+          auto-expiry
+        </p>
+      </header>
 
-      function updateStatus(elementId, content, type = "normal") {
-        const el = document.getElementById(elementId);
-        el.classList.add("show");
-        el.innerHTML = `
-        <div class="status-box ${type === "success" ? "success" : type === "error" ? "error" : ""}">
-          ${content}
-        </div>`;
+      <!-- Card: Upload -->
+      <div class="card card-upload">
+        <div class="card-glow"></div>
+
+        <div class="card-head">
+          <div>
+            <div class="step-tag">Step 01</div>
+            <div class="card-title">Upload to Cloud</div>
+          </div>
+          <div class="badge">
+            <svg
+              width="10"
+              height="10"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            48hr expiry
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="flabel" for="uploaderName">Your name</label>
+          <input
+            class="finput"
+            type="text"
+            id="uploaderName"
+            placeholder="e.g. Lalith"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="field">
+          <label class="flabel">File to share</label>
+          <div class="drop-zone" id="dropZone">
+            <input type="file" id="filePicker" onchange="onFileSelect(this)" />
+            <div class="dz-icon">
+              <svg
+                width="19"
+                height="19"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+            </div>
+            <p class="dz-hint">
+              <strong>Click to browse</strong> or drag &amp; drop
+            </p>
+            <span class="dz-name" id="dzName"></span>
+          </div>
+        </div>
+
+        <button class="btn btn-blue" id="uploadBtn" onclick="handleUpload()">
+          <span class="spinner" id="upSpin"></span>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          <span id="upLabel">Generate Link &amp; Upload</span>
+        </button>
+
+        <div class="status-wrap" id="upStatus">
+          <div class="status-box" id="upBox"></div>
+        </div>
+      </div>
+
+      <!-- Connector -->
+      <div class="connector">
+        <div class="conn-node">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card: Download -->
+      <div class="card card-download">
+        <div class="card-glow"></div>
+
+        <div class="card-head">
+          <div>
+            <div class="step-tag green">Step 02</div>
+            <div class="card-title">Retrieve File</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="flabel" for="fileIdInput">Metadata ID</label>
+          <input
+            class="finput"
+            type="text"
+            id="fileIdInput"
+            placeholder="Paste MongoDB file ID…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <button class="btn btn-green" id="dlBtn" onclick="handleDownload()">
+          <span class="spinner" id="dlSpin"></span>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <span id="dlLabel">Verify &amp; Download</span>
+        </button>
+
+        <div class="status-wrap" id="dlStatus">
+          <div class="status-box" id="dlBox"></div>
+        </div>
+      </div>
+    </div>
+    <!-- /.wrap -->
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="pill-row">
+        <span class="pill">End-to-End Encrypted</span>
+        <span class="pill">Direct S3 PUT</span>
+        <span class="pill">No Server Storage</span>
+        <span class="pill">Zero Logs</span>
+      </div>
+      <p class="foot-note">
+        Files self-destruct after 48 hours &nbsp;·&nbsp; ephemeral transfer
+      </p>
+    </footer>
+
+    <script>
+      const API = "http://localhost:5000/api";
+
+      /* ── THEME ── */
+      const root = document.documentElement;
+      const stored = localStorage.getItem("eph-theme");
+      if (stored) root.setAttribute("data-theme", stored);
+
+      document.getElementById("themeToggle").addEventListener("click", () => {
+        const t = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", t);
+        localStorage.setItem("eph-theme", t);
+      });
+
+      /* ── PARTICLES ── */
+      const pc = document.getElementById("particles");
+      for (let i = 0; i < 24; i++) {
+        const d = document.createElement("div");
+        d.className = "pdot";
+        const s = Math.random() * 2.2 + 0.7;
+        d.style.cssText = `
+        width:${s}px;height:${s}px;
+        left:${Math.random() * 100}%;
+        animation-duration:${13 + Math.random() * 20}s;
+        animation-delay:${Math.random() * 16}s;
+        opacity:${Math.random() * 0.35 + 0.08};
+      `;
+        pc.appendChild(d);
       }
 
-      async function handleUpload() {
-        const uploaderName = document
-          .getElementById("uploaderName")
-          .value.trim();
-        const fileInput = document.getElementById("filePicker");
-        const uploadStatus = document.getElementById("uploadStatus");
+      /* ── FILE SELECT ── */
+      function onFileSelect(input) {
+        const zone = document.getElementById("dropZone");
+        const name = document.getElementById("dzName");
+        if (input.files[0]) {
+          zone.classList.add("filled");
+          name.textContent = input.files[0].name;
+        } else {
+          zone.classList.remove("filled");
+        }
+      }
 
-        if (!uploaderName || !fileInput.files[0]) {
-          return alert("Please enter your name and choose a file to share.");
+      /* ── STATUS ── */
+      function setStatus(wrId, boxId, html, type = "info") {
+        const wr = document.getElementById(wrId);
+        const box = document.getElementById(boxId);
+        box.className = `status-box s-${type}`;
+        box.innerHTML = html;
+        wr.classList.add("open");
+      }
+
+      function stag(text, type) {
+        return `<div class="s-tag ${type}">${text}</div>`;
+      }
+
+      function setBtn(btnId, spId, lblId, loading, text) {
+        document.getElementById(btnId).disabled = loading;
+        const sp = document.getElementById(spId);
+        sp.style.display = loading ? "inline-block" : "none";
+        document.getElementById(lblId).textContent = text;
+      }
+
+      function copy(val, btn) {
+        navigator.clipboard.writeText(val).then(() => {
+          btn.textContent = "COPIED!";
+          setTimeout(() => (btn.textContent = "COPY"), 1900);
+        });
+      }
+
+      /* ── UPLOAD ── */
+      async function handleUpload() {
+        const name = document.getElementById("uploaderName").value.trim();
+        const fp = document.getElementById("filePicker");
+
+        if (!name || !fp.files[0]) {
+          setStatus(
+            "upStatus",
+            "upBox",
+            stag("Validation Error", "err") +
+              "Please enter your name and select a file.",
+            "err",
+          );
+          return;
         }
 
-        const file = fileInput.files[0];
-        updateStatus(
-          "uploadStatus",
-          "Step 1/3: Creating upload link handshake...",
+        const file = fp.files[0];
+        setBtn("uploadBtn", "upSpin", "upLabel", true, "Handshaking…");
+        setStatus(
+          "upStatus",
+          "upBox",
+          stag("Connecting", "info") +
+            "Step 1/3 — Requesting signed upload URL…",
+          "info",
         );
 
         try {
-          // A. Handshake to retrieve Signed URL
-          const urlResponse = await fetch(
-            `${API_BASE}/upload-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type || "application/octet-stream")}`,
+          const r1 = await fetch(
+            `${API}/upload-url?fileName=${encodeURIComponent(file.name)}&fileType=${encodeURIComponent(file.type || "application/octet-stream")}`,
           );
-          if (!urlResponse.ok) throw new Error("Failed to sign URL handshake");
+          if (!r1.ok) throw new Error("Failed to obtain signed URL.");
+          const { uploadUrl, s3Key } = await r1.json();
 
-          const { uploadUrl, s3Key } = await urlResponse.json();
-
-          // B. Pure Cloud Upload
-          updateStatus(
-            "uploadStatus",
-            "Step 2/3: Direct streaming to S3 Cloud Storage...",
+          setBtn("uploadBtn", "upSpin", "upLabel", true, "Uploading…");
+          setStatus(
+            "upStatus",
+            "upBox",
+            stag("Uploading", "info") + "Step 2/3 — Streaming directly to S3…",
+            "info",
           );
-          const uploadResult = await fetch(uploadUrl, {
+
+          const r2 = await fetch(uploadUrl, {
             method: "PUT",
             headers: {
               "Content-Type": file.type || "application/octet-stream",
             },
             body: file,
           });
+          if (!r2.ok)
+            throw new Error(
+              "S3 rejected the upload. Check bucket CORS policy.",
+            );
 
-          if (!uploadResult.ok)
-            throw new Error("AWS bucket rejected direct upload");
-
-          // C. DB Metadata Registration
-          updateStatus(
-            "uploadStatus",
-            "Step 3/3: Verifying cloud metadata in database...",
+          setStatus(
+            "upStatus",
+            "upBox",
+            stag("Registering", "info") +
+              "Step 3/3 — Writing metadata to database…",
+            "info",
           );
-          const dbResponse = await fetch(`${API_BASE}/files`, {
+
+          const r3 = await fetch(`${API}/files`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              uploaderName,
+              uploaderName: name,
               fileName: file.name,
               fileFormat: file.type || "unknown",
               fileSize: file.size,
               s3Key,
             }),
           });
+          if (!r3.ok) throw new Error("Database write failed.");
 
-          if (!dbResponse.ok) throw new Error("Failed to write to database.");
+          const { fileId } = await r3.json();
+          const safe = fileId.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 
-          const data = await dbResponse.json();
-          updateStatus(
-            "uploadStatus",
+          setStatus(
+            "upStatus",
+            "upBox",
             `
-          <strong>Upload Complete!</strong><br><br>
-          Send this unique ID to your friend:<br>
-          <code>${data.fileId}</code>
+          ${stag("Upload Complete", "ok")}
+          <strong>File uploaded successfully.</strong> Share this ID:<br>
+          <div class="id-row">
+            <span class="id-val">${fileId}</span>
+            <button class="copy-btn" onclick="copy('${safe}',this)">COPY</button>
+          </div>
         `,
-            "success",
+            "ok",
           );
-        } catch (err) {
-          updateStatus(
-            "uploadStatus",
-            `<strong>Process Error:</strong> ${err.message}`,
-            "error",
+        } catch (e) {
+          setStatus(
+            "upStatus",
+            "upBox",
+            stag("Error", "err") + `<strong>${e.message}</strong>`,
+            "err",
+          );
+        } finally {
+          setBtn(
+            "uploadBtn",
+            "upSpin",
+            "upLabel",
+            false,
+            "Generate Link & Upload",
           );
         }
       }
 
+      /* ── DOWNLOAD ── */
       async function handleDownload() {
         const id = document.getElementById("fileIdInput").value.trim();
-        const downloadStatus = document.getElementById("downloadStatus");
+        if (!id) {
+          setStatus(
+            "dlStatus",
+            "dlBox",
+            stag("Validation Error", "err") + "Please enter a valid file ID.",
+            "err",
+          );
+          return;
+        }
 
-        if (!id) return alert("Please enter a valid file metadata ID.");
+        setBtn("dlBtn", "dlSpin", "dlLabel", true, "Verifying…");
+        setStatus(
+          "dlStatus",
+          "dlBox",
+          stag("Checking", "info") + "Querying file metadata from database…",
+          "info",
+        );
 
         try {
-          updateStatus("downloadStatus", "Checking metadata cluster status...");
-          const res = await fetch(`${API_BASE}/download/${id}`);
+          const res = await fetch(`${API}/download/${id}`);
           const data = await res.json();
+          if (!res.ok)
+            throw new Error(data.error || "File not found or expired.");
 
-          if (!res.ok) throw new Error(data.error);
+          const mb = (data.fileSize / 1024 / 1024).toFixed(2);
 
-          updateStatus(
-            "downloadStatus",
+          setStatus(
+            "dlStatus",
+            "dlBox",
             `
-          <strong>File Verified Successfully!</strong><br><br>
-          <strong>Name:</strong> ${data.fileName}<br>
-          <strong>Uploader:</strong> ${data.uploaderName}<br>
-          <strong>Size:</strong> ${(data.fileSize / 1024 / 1024).toFixed(2)} MB<br><br>
-          <a href="${data.downloadUrl}" target="_blank" style="background:var(--accent-green); color:#090d16; padding:12px 18px; text-decoration:none; display:inline-block; border-radius:8px; font-weight:bold; font-size: 0.9rem;">Download File from AWS</a>
+          ${stag("Verified", "ok")}
+          <strong>${data.fileName}</strong><br>
+          <span style="font-family:'Fira Code',monospace;font-size:0.73rem;color:var(--text-muted)">
+            Uploaded by ${data.uploaderName} &nbsp;·&nbsp; ${mb} MB
+          </span><br>
+          <a class="dl-link" href="${data.downloadUrl}" target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download from AWS
+          </a>
         `,
-            "success",
+            "ok",
           );
-        } catch (err) {
-          updateStatus(
-            "downloadStatus",
-            `<strong>Process Error:</strong> ${err.message}`,
-            "error",
+        } catch (e) {
+          setStatus(
+            "dlStatus",
+            "dlBox",
+            stag("Error", "err") + `<strong>${e.message}</strong>`,
+            "err",
           );
+        } finally {
+          setBtn("dlBtn", "dlSpin", "dlLabel", false, "Verify & Download");
         }
       }
     </script>
