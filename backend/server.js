@@ -3,7 +3,12 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import crypto from "crypto"; // Added native crypto module for secure tokens
+import crypto from "crypto";
+import session from "express-session";
+import passport from "passport";
+import "./config/passport.js"; // Initialize passport strategies
+
+
 import {
   S3Client,
   PutObjectCommand,
@@ -13,15 +18,42 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { File } from "./models/File.js";
 
 dotenv.config();
-const app = express();
 
-app.use(cors());
+// Initialize passport strategies (loads env inside module)
+import "./config/passport.js";
+
+const app = express();
+const clientUrl = process.env.CLIENT_URL || "http://localhost:5500";
+
+app.use(cors({ origin: clientUrl, credentials: true }));
 app.use(express.json());
+
+if (!process.env.SESSION_SECRET) {
+  console.warn(
+    "[WARN] SESSION_SECRET is not set. Set it in backend/.env for secure sessions.",
+  );
+}
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "dev-insecure-secret",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    },
+  }),
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use((req, res, next) => {
   console.log(`[REQUEST] ${req.method} ${req.url}`);
   next();
 });
-
 // 1. Establish strict MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
@@ -39,6 +71,55 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
+
+// --- Auth Routes ---
+app.get(
+  "/api/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] }),
+);
+
+app.get(
+  "/api/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: `${clientUrl}/?auth=failed`,
+  }),
+  (req, res) => {
+    res.redirect(clientUrl);
+  },
+);
+
+app.get(
+  "/api/auth/github",
+  passport.authenticate("github", { scope: ["user:email"] }),
+);
+
+app.get(
+  "/api/auth/github/callback",
+  passport.authenticate("github", {
+    failureRedirect: `${clientUrl}/?auth=failed`,
+  }),
+  (req, res) => {
+    res.redirect(clientUrl);
+  },
+);
+
+app.get("/api/auth/status", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ isAuthenticated: true, user: req.user });
+  } else {
+    res.json({ isAuthenticated: false });
+  }
+});
+
+app.get("/api/auth/logout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    req.session?.destroy(() => {
+      res.redirect(clientUrl);
+    });
+  });
+});
+// -------------------
 
 // Route A: Request Upload URL from S3
 app.get("/api/upload-url", async (req, res) => {
@@ -68,8 +149,12 @@ app.get("/api/upload-url", async (req, res) => {
 
 // Route B: Confirm Upload and save Metadata with secure token
 app.post("/api/files", async (req, res) => {
-  const { uploaderName, fileName, fileFormat, fileSize, s3Key } = req.body;
-  if (!uploaderName || !fileName || !fileFormat || !fileSize || !s3Key) {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Unauthorized. Please log in." });
+  }
+
+  const { fileName, fileFormat, fileSize, s3Key, targetEmail } = req.body;
+  if (!fileName || !fileFormat || !fileSize || !s3Key || !targetEmail) {
     return res.status(400).json({ error: "Incomplete metadata payload." });
   }
 
@@ -78,12 +163,13 @@ app.post("/api/files", async (req, res) => {
     const sharingToken = crypto.randomBytes(16).toString("hex");
 
     const fileDoc = await File.create({
-      uploaderName,
+      uploadedBy: req.user._id,
       fileName,
       fileFormat,
       fileSize,
       s3Key,
       sharingToken, // Persisting secure identifier
+      targetEmail,
     });
 
     // Return the secure random token to the frontend instead of raw _id
@@ -96,16 +182,38 @@ app.post("/api/files", async (req, res) => {
 
 // Route C: Request Secure Download URL using the random token
 app.get("/api/download/:fileId", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: "Unauthorized. Please log in to download." });
+  }
+
   const { fileId } = req.params; // This matches the sharingToken
 
   try {
-    // Query database directly by the cryptographically random token
-    const file = await File.findOne({ sharingToken: fileId });
+    // First, find the file to verify the user
+    let file = await File.findOne({ sharingToken: fileId }).populate("uploadedBy");
+    if (!file) {
+      return res.status(404).json({ error: "File does not exist." });
+    }
+    
+    // Verify target user
+    if (file.targetEmail !== req.user.email) {
+      return res.status(403).json({ error: "Access denied. You are not authorized to access this file." });
+    }
+
+    if (file.isUsed) {
+      return res.status(410).json({ error: "This link has already been used and is expired." });
+    }
+
+    // Atomically "burn" the link to guarantee one-time use even with concurrent requests.
+    const burnedAt = new Date();
+    file = await File.findOneAndUpdate(
+      { sharingToken: fileId, isUsed: false },
+      { $set: { isUsed: true, downloadedAt: burnedAt } },
+      { new: true },
+    ).populate("uploadedBy");
 
     if (!file) {
-      return res
-        .status(404)
-        .json({ error: "Link has expired or file does not exist." });
+      return res.status(410).json({ error: "This link has already been used and is expired." });
     }
 
     const command = new GetObjectCommand({
@@ -119,7 +227,7 @@ app.get("/api/download/:fileId", async (req, res) => {
       downloadUrl,
       fileName: file.fileName,
       fileSize: file.fileSize,
-      uploaderName: file.uploaderName,
+      uploaderName: file.uploadedBy ? file.uploadedBy.displayName : "Unknown",
     });
   } catch (error) {
     console.error("S3 Get Error:", error);

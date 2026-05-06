@@ -2,10 +2,9 @@
 import mongoose from "mongoose";
 
 const fileSchema = new mongoose.Schema({
-  uploaderName: {
-    type: String,
-    required: true,
-    trim: true,
+  uploadedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
   fileName: {
     type: String,
@@ -30,6 +29,17 @@ const fileSchema = new mongoose.Schema({
     required: true,
     unique: true,
     index: true, // Highly efficient for fast lookups
+  },
+  targetEmail: {
+    type: String,
+    required: true,
+  },
+  isUsed: {
+    type: Boolean,
+    default: false,
+  },
+  downloadedAt: {
+    type: Date,
   },
   createdAt: {
     type: Date,
