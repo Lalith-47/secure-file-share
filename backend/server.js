@@ -34,6 +34,8 @@ if (!process.env.SESSION_SECRET) {
   );
 }
 
+app.set("trust proxy", 1); // Trust Render proxy for secure cookies
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "dev-insecure-secret",
@@ -41,7 +43,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       secure: process.env.NODE_ENV === "production",
     },
   }),
@@ -54,6 +56,11 @@ app.use((req, res, next) => {
   console.log(`[REQUEST] ${req.method} ${req.url}`);
   next();
 });
+// Health check route
+app.get("/", (req, res) => {
+  res.send("Secure File Share API is running successfully!");
+});
+
 // 1. Establish strict MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI)
