@@ -56,17 +56,9 @@ app.use((req, res, next) => {
   console.log(`[REQUEST] ${req.method} ${req.url}`);
   next();
 });
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Serve the frontend statically! This solves all CORS and 3rd-party cookie issues.
-app.use(express.static(path.join(__dirname, "../frontend")));
-
+// Health check route
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+  res.send("Secure File Share API is running successfully!");
 });
 
 // 1. Establish strict MongoDB Connection
